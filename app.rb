@@ -5,8 +5,10 @@ require 'open-uri'
 
 class TehGuardian < Sinatra::Base
 
-  set :dalli, Dalli::Client.new
-
+  dalli_client = Dalli::Client.new
+  set :dalli, dalli_client
+  use Rack::Cache, verbose: true, metastore: dalli_client, entitystore: dalli_client
+  
   configure :development do
     enable :logging, :dump_errors, :raise_errors
   end
@@ -65,14 +67,13 @@ class TehGuardian < Sinatra::Base
   end
 
   get %r{.*} do
+    cache_control :public, max_age: 5
     @random = Random.new(Digest::MD5.hexdigest(url).to_i(16))
     subbed = grab_url("http://www.theguardian.com#{request.path}").gsub('theguardian','tehguardian').gsub("The Guardian", "Teh Guardian").gsub("the Guardian", "teh Guardian")
     doc = Nokogiri::HTML(subbed)
     candidates = gather_candidates doc.css("#content")
     to_deface = pick_nodes candidates
-    logger.info to_deface
     deface_nodes to_deface
-    logger.info "#{candidates.count} candidates for defacement"
     doc.to_html
   end
 end
