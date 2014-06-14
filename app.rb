@@ -13,6 +13,7 @@ class TehGuardian < Sinatra::Base
 
   def grab_url url
     hash = Digest::MD5.hexdigest url
+    url = "#{url}-#{3600* (Time.now.to_i / 3600)}"
     if result = settings.dalli.get(hash) 
       puts "GOT CACHED #{url}"
       result
