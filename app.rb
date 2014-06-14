@@ -51,19 +51,32 @@ class TehGuardian < Sinatra::Base
   def deface_node node
     text = node.inner_text
 
-    if !text.sub!(" and ", ", and ")
-      if !text.sub!("'s", ["s","s'"].shuffle(random: @random).first)
-        if !text.sub!("s'","s's")
-        end
+    what_happened = (
+      
+      if text.sub!("'s", ["s","s'"].shuffle(random: @random).first)
+        "A stray apostrophe"
+      elsif text.sub!(" and ", ", and ")
+        "An oxford comma"
+      elsif !text.sub!("s'",["s's","s"])
+        "A mistaken plural apostrophe"
       end
-    end
+    )
     node.content = text
+    what_happened
   end
 
   def deface_nodes nodes
+    actions = []
     nodes.each do |node|
-      deface_node node
+      actions << deface_node(node)
     end
+    actions
+  end
+
+  def add_actions_to_footer actions, doc
+    what = Nokogiri::XML::Node.new "p", doc
+    what.content = "This is a hack by @Stef. Try to spot the deliberate mistakes? #{actions.join(". ")}."
+    doc.css("#footer").first.add_child(what)
   end
 
   get %r{.*} do
@@ -73,7 +86,8 @@ class TehGuardian < Sinatra::Base
     doc = Nokogiri::HTML(subbed)
     candidates = gather_candidates doc.css("#content")
     to_deface = pick_nodes candidates
-    deface_nodes to_deface
+    actions = deface_nodes to_deface
+    add_actions_to_footer actions, doc
     doc.to_html
   end
 end
