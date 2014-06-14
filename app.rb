@@ -15,12 +15,12 @@ class TehGuardian < Sinatra::Base
 
   def grab_url url
     hash = Digest::MD5.hexdigest url
-    url = "#{url}-#{3600* (Time.now.to_i / 3600)}"
+    hash = "#{hash}-#{3600* (Time.now.to_i / 3600)}"
     if result = settings.dalli.get(hash) 
-      puts "GOT CACHED #{url}"
+      logger.info "GOT CACHED #{url}"
       result
     else
-      puts "NO CACHED #{url}"
+      logger.info "NO CACHED #{url}"
       grab = open(url).read
       settings.dalli.set hash, grab
       grab
