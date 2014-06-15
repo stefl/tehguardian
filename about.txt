@@ -1,0 +1,77 @@
+You may remember that in 2013 The Guardian rebranded as The Guardian. No, I thought it was a bit odd too. Something to do with guardian.co.uk changing to theguardian.com
+
+Now, if you saw that happening, what would your immediate reaction be?
+
+Of course. Same here. I went to my usual domain registrar site, and whacked in thegrauniad.com but obviously they'd thought of that. 
+
+So I typed in "tehguardian.com", "teh" being the proper way to spell "the" on the internet, and gosh. Would you look at that? Somehow nobody had thought to buy it. And I use one of those one-click domain registrars. And I was feeling mischevious. And…
+
+Well, it sat there in my list of domaisn until I was at Hack The Space this weekend. It was an "art hack" in the turbine hall of the Tate Modern. Quite the environment in which to hold a hack day!
+
+I'd come with one idea, but after some aborted conversations about it I was feeling a little bit blocked and uninspired. And it was coming up to midnight.
+
+Sometimes, the best way to unblock yourself is to have a second canvas. A bit of time spent doing something entirely unrelated can release creative energy in your "main thing" (more on that in a separate post).
+
+So I did a "comedy hack". I was telling Pascal, one of the other hackers about the fact that I owned the domain, and there were about seven of the Guardian team in the room, and well, wouldn't it be really funny to demo something on-stage that was a hack on their site?
+
+And we riffed about what it could be, and somehow we found ourselves laughing about how it would be wonderful to take the piss out of the reputation that the Guardian, probably unfairly nowadays, has for typos in published articles.
+
+By inserting our own.
+
+A couple of hours of scrappy hacking later (between 1 and 3am, I must add) I'd coded and deployed my little comedy hack: 
+
+TehGuardian.com
+
+It's the Guardian website as we know and love. But every single article page has up to five grammatical errors introduced into it.
+
+So if you make the mistake of typing in "teh" instead of "the" when you try to reach the Guardian, you'll also receive a slightly glitchy version back.
+
+It's quite subtle. Probably my subtlest hack yet, and it works like this:
+
+Every request coming in to my tehguardian.com site, grab the corresponding url from theguardian.com. Swap out all instances of "theguardian", "the guardian", "The Guardian" for their equivalent "teh" versions (so all internal links work and you can navigate as usual).
+
+Parse the page with Ruby's Nokogiri library. 
+
+Look for the #content Div element, and if it is present, scan it for "defacement candidates". This is a recursive function that looks for any piece of text containing "and", "'s", "s'" or "they're".
+
+Then, generate a random seed for the URL. This is so that we can consistently deface the page for visitors - so the mistakes will always be the same mistakes.
+
+Sort the "defacement candidates" using a random function based on that seed. Then pick the first five.
+
+Then for each of those five elements, deface them by either swapping an "and" for ", and" (introducing an Oxford comma), replacing "'s" for just "s", replacing "s'" for either "s's" or "s", or perhaps "they're" for "their" or "there".
+
+Then tell Nokogiri to render out as HTML and serve it up!
+
+There's some caching in their with Memcache too so that it can handle load from a free Heroku instance.
+
+And that's about it!
+
+So why do this?
+
+It's great for winding up Guardian authors
+
+You can now message anyone who's written for the Guardian and wind them up by asking if they really did mean to use an Oxford comma there, and are they aware that it should be "s'", not "s's" as they have written in their piece.
+
+It's great for winding up pedants
+
+What do you mean Mr or Mrs random online pedant? I most certainly do know how to use an apostrophe correctly - look, even the Guardian do it like this nowadays!
+
+It's silly
+
+This is a very silly thing to do and will probably get me in a wee bit of trouble. But a hack day without a comedyhack isn't really a hack day.
+
+It could be educational
+
+Mary from the London Review of Books took one look at this and said, "You know, this could be a valuable educational tool! You could use it to train proof-readers". 
+
+I nodded and pointed out that of course I'd meant it to be a valuable educational tool all along. Absolutely I did.
+
+It could be serious
+
+But the serious point I'd like people to take from this hack is this:
+
+The browser manufacturers are trying to hide our URL bar from us. Sure, that could be fine in a lot of cases. But when you're looking at a page, and you're not quite sure if you're looking at the real thing, even if it looks like the real thing, you can always look up and check it out.
+
+If we keep going down that path I do worry about that missing context and the ability to check the validity of what you're reading or seeing.
+
+Sure, this is just a few stray pieces of punctuation, but I could just as easily have inserted anything else into these pages and served them to the user.
