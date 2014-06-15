@@ -29,7 +29,7 @@ class TehGuardian < Sinatra::Base
 
   def is_a_candidate? node
     text = node.inner_text
-    text.include?("'s") || text.include?(" and ") || text.include?("s'")
+    text.include?("'s") || text.include?("they're") || text.include?(" and ") || text.include?("s'")
   end
 
   def gather_candidates node
@@ -55,6 +55,8 @@ class TehGuardian < Sinatra::Base
       
       if text.sub!("'s", ["s","s'"].shuffle(random: @random).first)
         "A stray apostrophe"
+      elsif text.sub!("they're", ["their","there"].shuffle(random: @random).first)
+        "A dodgy they're"
       elsif text.sub!(" and ", ", and ")
         "An oxford comma"
       elsif !text.sub!("s'",["s's","s"])
